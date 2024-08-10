@@ -89,44 +89,57 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For any questions or suggestions, feel free to open an issue or contact the project maintainers.
 
-Here's an updated database schema outline that includes Client Management and Inventory Management features:
+The updated MongoDB schema, including a **Users** collection:
 
-Certainly! Here's the MongoDB schema in a tabular format:
+### 1. **Users Collection**
 
-### 1. **Clients Collection**
+| Field Name      | Data Type | Description                                       |
+| --------------- | --------- | ------------------------------------------------- |
+| `_id`           | ObjectId  | Primary Key. Unique identifier for each user.     |
+| `username`      | String    | The username of the user.                         |
+| `email`         | String    | The email address of the user.                    |
+| `password_hash` | String    | Hashed password of the user for authentication.   |
+| `role`          | String    | The role of the user (e.g., "admin," "user").     |
+| `created_at`    | ISODate   | Timestamp when the user account was created.      |
+| `updated_at`    | ISODate   | Timestamp when the user account was last updated. |
 
-| Field Name     | Data Type | Description                                             |
-| -------------- | --------- | ------------------------------------------------------- |
-| `_id`          | ObjectId  | Primary Key. Unique identifier for each client.         |
-| `name`         | String    | The name of the client.                                 |
-| `address`      | String    | The address of the client.                              |
-| `phone_number` | String    | The phone number of the client.                         |
-| `email`        | String    | The email address of the client.                        |
-| `created_at`   | ISODate   | Timestamp when the client was added.                    |
-| `updated_at`   | ISODate   | Timestamp when the client information was last updated. |
+### 2. **Clients Collection**
 
-### 2. **Items Collection**
+| Field Name     | Data Type | Description                                                            |
+| -------------- | --------- | ---------------------------------------------------------------------- |
+| `_id`          | ObjectId  | Primary Key. Unique identifier for each client.                        |
+| `name`         | String    | The name of the client.                                                |
+| `address`      | String    | The address of the client.                                             |
+| `phone_number` | String    | The phone number of the client.                                        |
+| `email`        | String    | The email address of the client.                                       |
+| `created_by`   | ObjectId  | Foreign Key. References the `Users` collection (who added the client). |
+| `created_at`   | ISODate   | Timestamp when the client was added.                                   |
+| `updated_at`   | ISODate   | Timestamp when the client information was last updated.                |
 
-| Field Name       | Data Type  | Description                                          |
-| ---------------- | ---------- | ---------------------------------------------------- |
-| `_id`            | ObjectId   | Primary Key. Unique identifier for each item.        |
-| `name`           | String     | The name of the item (e.g., "Shirt").                |
-| `category_id`    | ObjectId   | Foreign Key. References the `Categories` collection. |
-| `price`          | Decimal128 | The price of the item.                               |
-| `stock_quantity` | Integer    | The current quantity of the item in stock.           |
-| `created_at`     | ISODate    | Timestamp when the item was added.                   |
-| `updated_at`     | ISODate    | Timestamp when the item was last updated.            |
+### 3. **Items Collection**
 
-### 3. **Categories Collection**
+| Field Name       | Data Type  | Description                                                          |
+| ---------------- | ---------- | -------------------------------------------------------------------- |
+| `_id`            | ObjectId   | Primary Key. Unique identifier for each item.                        |
+| `name`           | String     | The name of the item (e.g., "Shirt").                                |
+| `category_id`    | ObjectId   | Foreign Key. References the `Categories` collection.                 |
+| `price`          | Decimal128 | The price of the item.                                               |
+| `stock_quantity` | Integer    | The current quantity of the item in stock.                           |
+| `created_by`     | ObjectId   | Foreign Key. References the `Users` collection (who added the item). |
+| `created_at`     | ISODate    | Timestamp when the item was added.                                   |
+| `updated_at`     | ISODate    | Timestamp when the item was last updated.                            |
 
-| Field Name   | Data Type | Description                                       |
-| ------------ | --------- | ------------------------------------------------- |
-| `_id`        | ObjectId  | Primary Key. Unique identifier for each category. |
-| `name`       | String    | The name of the category (e.g., "Men's Wear").    |
-| `created_at` | ISODate   | Timestamp when the category was added.            |
-| `updated_at` | ISODate   | Timestamp when the category was last updated.     |
+### 4. **Categories Collection**
 
-### 4. **Orders Collection**
+| Field Name   | Data Type | Description                                                              |
+| ------------ | --------- | ------------------------------------------------------------------------ |
+| `_id`        | ObjectId  | Primary Key. Unique identifier for each category.                        |
+| `name`       | String    | The name of the category (e.g., "Men's Wear").                           |
+| `created_by` | ObjectId  | Foreign Key. References the `Users` collection (who added the category). |
+| `created_at` | ISODate   | Timestamp when the category was added.                                   |
+| `updated_at` | ISODate   | Timestamp when the category was last updated.                            |
+
+### 5. **Orders Collection**
 
 | Field Name    | Data Type             | Description                                                                                        |
 | ------------- | --------------------- | -------------------------------------------------------------------------------------------------- |
@@ -136,18 +149,26 @@ Certainly! Here's the MongoDB schema in a tabular format:
 | `status`      | String                | The status of the order (e.g., "received," "in process," "completed").                             |
 | `total_price` | Decimal128            | The total price of the order.                                                                      |
 | `items`       | Array of Subdocuments | List of items included in the order. Each subdocument contains `item_id`, `quantity`, and `price`. |
+| `created_by`  | ObjectId              | Foreign Key. References the `Users` collection (who created the order).                            |
 | `created_at`  | ISODate               | Timestamp when the order was added.                                                                |
 | `updated_at`  | ISODate               | Timestamp when the order was last updated.                                                         |
 
-### 5. **Inventory_Logs Collection** (Optional)
+### 6. **Inventory_Logs Collection** (Optional)
 
-| Field Name        | Data Type | Description                                                |
-| ----------------- | --------- | ---------------------------------------------------------- |
-| `_id`             | ObjectId  | Primary Key. Unique identifier for each log record.        |
-| `item_id`         | ObjectId  | Foreign Key. References the `Items` collection.            |
-| `change_quantity` | Integer   | The amount by which the inventory changed (e.g., +10, -5). |
-| `change_type`     | String    | The type of change (e.g., "order," "restock").             |
-| `log_date`        | ISODate   | The date and time when the inventory change was recorded.  |
-| `created_at`      | ISODate   | Timestamp when the log was added.                          |
+| Field Name        | Data Type | Description                                                                         |
+| ----------------- | --------- | ----------------------------------------------------------------------------------- |
+| `_id`             | ObjectId  | Primary Key. Unique identifier for each log record.                                 |
+| `item_id`         | ObjectId  | Foreign Key. References the `Items` collection.                                     |
+| `change_quantity` | Integer   | The amount by which the inventory changed (e.g., +10, -5).                          |
+| `change_type`     | String    | The type of change (e.g., "order," "restock").                                      |
+| `log_date`        | ISODate   | The date and time when the inventory change was recorded.                           |
+| `created_by`      | ObjectId  | Foreign Key. References the `Users` collection (who recorded the inventory change). |
+| `created_at`      | ISODate   | Timestamp when the log was added.                                                   |
 
-This tabular format organizes the MongoDB schema for easy reference, with each field and its data type clearly defined.
+### Key Points:
+
+- **User Tracking:** The `created_by` field in each collection tracks which user added or modified a record.
+- **Security & Role Management:** The `Users` collection contains roles, which can be used for managing permissions within the application.
+- **Object References:** Use ObjectId references to link related data across different collections, as shown with `created_by` referencing the `Users` collection.
+
+This schema should allow you to efficiently manage users alongside clients, inventory, and orders in your MongoDB database.
